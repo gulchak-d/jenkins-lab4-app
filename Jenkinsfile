@@ -9,6 +9,7 @@ pipeline {
             }
         }
         stage('Build') {
+            agent any
             steps {
                 echo "Building ...${BUILD_NUMBER}"
                 echo "Build completed"
@@ -25,17 +26,18 @@ pipeline {
                 sh 'pip install Flask xmlrunner'
                 sh 'python3 app_tests.py'
             }
-        }
-    }
-    post {
-        always {
-            junit 'test-reports/*.xml'
-        }
-        success {
-            echo "Application testing successfully completed"
-        }
-        failure {
-            echo "Oooppss!!! Tests failed!"
+            // МИ ПЕРЕНЕСЛИ POST СЮДИ (ВСЕРЕДИНУ STAGE TEST)
+            post {
+                always {
+                    junit 'test-reports/*.xml'
+                }
+                success {
+                    echo "Application testing successfully completed"
+                }
+                failure {
+                    echo "Oooppss!!! Tests failed!"
+                }
+            }
         }
     }
 }
