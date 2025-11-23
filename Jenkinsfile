@@ -1,6 +1,7 @@
 pipeline {
     agent none
     options { timestamps() }
+    
     stages {
         stage('Check scm') {
             agent any
@@ -8,6 +9,7 @@ pipeline {
                 checkout scm
             }
         }
+        
         stage('Build') {
             agent any
             steps {
@@ -15,6 +17,7 @@ pipeline {
                 echo "Build completed"
             }
         }
+        
         stage('Test') {
             agent { 
                 docker { 
@@ -27,16 +30,28 @@ pipeline {
                 sh 'python3 app_tests.py'
             }
             post {
-                always {
-                    junit 'test-reports/*.xml'
-                }
-                success {
-                    echo "Application testing successfully completed"
-                }
-                failure {
-                    echo "Tests failed!"
+                always { junit 'test-reports/*.xml' }
+            }
+        }
+
+        stage('Deploy Image') {
+            agent any
+            steps {
+                script {
+                    def dockerHubUser = 'dariagulchak' 
+                
+                    docker.withRegistry('', 'dockerhub_id') {
+                        def customImage = docker.build("${dockerHubUser}/jenkins-lab4-app:${env.BUILD_NUMBER}")
+                        customImage.push()
+                        customImage.push('latest')
+                    }
                 }
             }
         }
+    }
+    
+    post {
+        success { echo "Pipeline completed successfully!" }
+        failure { echo "Pipeline failed!" }
     }
 }
