@@ -34,7 +34,7 @@ pipeline {
                     echo "Application testing successfully completed"
                 }
                 failure {
-                    echo "Oooppss!!! Tests failed!"
+                    echo "Tests failed!"
                 }
             }
         }
